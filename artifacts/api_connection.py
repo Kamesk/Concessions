@@ -1,5 +1,5 @@
 """
-Module provides connection to the Spotify API.
+Module provides connection to the heartbeat API.
 """
 import requests
 from extraction.api_authorization import ApiAuthorization
@@ -9,7 +9,7 @@ from datetime import date
 class DataExtractor:
     """
     Class connects to the API.
-    Provides set of functions allowing fetching data from Spotify.
+    Provides set of functions allowing fetching data from heartbeat.
     """
 
     def __init__(self) -> None:
@@ -22,14 +22,14 @@ class DataExtractor:
         }
         self.current_date = date.today().strftime("%Y-%m-%d")
 
-    def get_playlist_items(self, playlist_id: str) -> list[dict]:
+    def get_comments_items(self, playlist_id: str) -> list[dict]:
         """
         Gets items of an playlist.
 
         Parameters
         ----------
         playlist_id: str
-            ID of a Spotify playlist
+            ID of a heartbeat playlist
 
         Returns
         -------
@@ -44,7 +44,7 @@ class DataExtractor:
             }
         """
         limit = 50
-        url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit={limit}"
+        url = f"https://api.heartbeat.com/v1/comments/{playlist_id}/tracks?limit={limit}"
         response = requests.get(url=url, headers=self.headers)
         data: dict = response.json()
         # data["playlist_id"] = playlist_id
@@ -55,7 +55,7 @@ class DataExtractor:
                 "playlist_id": playlist_id,
                 "track_id": item["track"]["id"],
                 "track_order": index,
-                "playlist_number_of_tracks": total,
+                "comments": total,
                 "date_fetched": self.current_date,
             }
             playlist_items.append(track)
@@ -76,7 +76,7 @@ class DataExtractor:
             List object containing dictionary with playlist details
 
         """
-        url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
+        url = f"https://api.heartbeat.com/v1/playlists/{playlist_id}"
         response = requests.get(url=url, headers=self.headers)
         data: dict = response.json()
         playlist_details = {
@@ -85,11 +85,11 @@ class DataExtractor:
         }
         return [playlist_details]
 
-    def get_audio_features(self, track_id: str) -> dict:
+    def get_similarity_features(self, track_id: str) -> dict:
         """
-        Fetches audio features from Spotfiy API.
+        Fetches audio features from heartbeat API.
         Returns dictionary with audio analysis details.
-
+        """
         Parameters
         ----------
         track_id: str
@@ -120,8 +120,8 @@ class DataExtractor:
             'track_id': str,
             'popularity':int
             }
-        """
-        url = rf"https://api.spotify.com/v1/audio-features/{track_id}"
+        
+        url = rf"https://api.heartbeat.com/v1/audio-features/{track_id}"
         response = requests.get(
             url,
             headers=self.headers,
@@ -132,7 +132,7 @@ class DataExtractor:
 
     def get_track_popularity(self, track_id: str) -> int:
         """
-        Gets track popularity rating from Spotify API.
+        Gets track popularity rating from heartbeat API.
 
         Parameters
         ----------
@@ -144,7 +144,7 @@ class DataExtractor:
         popularity: int
             The popularity of a track is a value between 0 and 100, with 100 being the most popular.
         """
-        url = rf"https://api.spotify.com/v1/tracks/{track_id}"
+        url = rf"https://api.heartbeat.com/v1/tracks/{track_id}"
         response = requests.get(
             url,
             headers=self.headers,
@@ -169,7 +169,7 @@ class DataExtractor:
             list containing dictionaries with single track audio features
         """
         tracks = ",".join(track_ids)
-        url = rf"https://api.spotify.com/v1/audio-features?ids={tracks}"
+        url = rf"https://api.heartbeat.com/v1/audio-features?ids={tracks}"
         response = requests.get(
             url,
             headers=self.headers,
@@ -192,7 +192,7 @@ class DataExtractor:
             list containing dictionaries, each cotaining a single track details
         """
         ids = ",".join(track_ids)
-        url = rf"https://api.spotify.com/v1/tracks?ids={ids}"
+        url = rf"https://api.heartbeat.com/v1/tracks?ids={ids}"
         response = requests.get(
             url,
             headers=self.headers,
